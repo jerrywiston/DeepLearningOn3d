@@ -1,0 +1,173 @@
+{
+    "train":
+        {
+            "solver": "SGD",
+            "regularizer": "L2",
+            "momentum": 0.9,
+            "weight_decay": 0.0005,
+            "base_lr": 0.001,
+            "lr_policy": 0.1,
+            "lr_stepsize": 2000,
+            "snapshot_prefix": "",
+            "path": "",
+            "max_iter": 10000,
+            "snapshot_iter": 2500,
+            "display_iter": 1,
+            "test_iter": 3,
+            "test_interval": 20,
+            "debug_mode": false,
+            "GPU": [3]
+        },
+
+    "layers":[
+        {
+            "type": "MemoryData",
+            "name": "dataTrain",
+            "phase": "Training",
+            "file_data": ["TrainingData/data.tensor", "TrainingData/label.tensor"],
+            "batch_size": 64,
+            "out": ["data","label"]
+        },
+        {
+            "type": "MemoryData",
+            "name": "dataTest",
+            "phase": "Testing",
+            "file_data": ["TestingData/data.tensor", "TestingData/label.tensor"],
+            "batch_size": 64,
+            "out": ["data","label"]
+        },
+        {
+            "in": ["data"],
+            "type": "Convolution",
+            "name": "conv1",
+            "num_output": 96,
+            "window": [5,5,5],
+            "padding": [2,2,2],
+            "stride": [1,1,1],
+            "upscale": [1,1,1],
+            "weight_lr_mult": 1.0,
+            "weight_decay_mult": 1.0,
+            "weight_filler": "Gaussian",
+            "weight_filler_param": 0.01,
+            "bias_lr_mult": 2.0,
+            "bias_decay_mult": 0.0,
+            "bias_filler": "Constant",
+            "bias_filler_param": 0.0,
+            "out": ["conv1"]
+        },
+        {
+            "in": ["conv1"],
+            "type": "Activation",
+            "name": "relu1",
+            "mode": "ReLU",
+            "out": ["conv1"]
+        },
+        {
+            "in": ["conv1"],
+            "type": "Pooling",
+            "name": "pool1",
+            "mode": "max",
+            "window": [2,2,2],
+            "stride": [2,2,2],
+            "out": ["pool1"]
+        },
+        {
+            "in": ["pool1"],
+			"type": "Convolution",
+			"name": "conv2",
+			"num_output": 192,
+			"window": [3,3,3],
+			"padding": [1,1,1],
+			"stride": [1,1,1],
+			"weight_lr_mult": 1.0,
+			"weight_decay_mult": 1.0,
+			"weight_filler": "Gaussian",
+			"weight_filler_param": 0.01,
+			"bias_lr_mult": 2.0,
+			"bias_decay_mult": 0.0,
+			"bias_filler": "Constant",
+			"bias_filler_param": 0.0,
+			"out": ["conv2"]
+		},
+		{
+			"in": ["conv2"],
+			"type": "Activation",
+			"name": "relu2",
+			"mode": "ReLU",
+			"out": ["conv2"]
+		},
+		{
+			"in": ["conv2"],
+			"type": "Pooling",
+			"name": "pool2",
+			"mode": "max",
+			"window": [2,2,2],
+			"stride": [2,2,2],
+			"out": ["pool2"]
+		},
+		{
+			"in": ["pool2"],
+			"type": "Convolution",
+			"name": "reduction_1",
+			"num_output": 192,
+			"window": [1,1,1],
+			"stride": [1,1,1],
+			"padding": [0,0,0],
+			"weight_lr_mult": 1.0,
+			"weight_decay_mult": 1.0,
+			"weight_filler": "Gaussian",
+			"weight_filler_param": 0.01,
+			"bias_lr_mult": 2.0,
+			"bias_decay_mult": 0.0,
+			"bias_filler": "Constant",
+			"bias_filler_param": 0.0,
+			"out": ["reduction_1"]
+		},
+        {
+			"in": ["reduction_1"],
+			"type": "Activation",
+			"name": "relu4",
+			"mode": "ReLU",
+			"out": ["reduction_1"]
+		},
+        {
+			"in": ["reduction_1"],
+			"type": "Convolution",
+			"name": "conv_cls_score_1",
+			"num_output": 8,
+			"window": [2,2,2],
+			"stride": [1,1,1],
+			"padding": [1,1,1],
+			"weight_lr_mult": 1.0,
+			"weight_decay_mult": 1.0,
+			"weight_filler": "Gaussian",
+			"weight_filler_param": 0.01,
+			"bias_lr_mult": 2.0,
+			"bias_decay_mult": 0.0,
+			"bias_filler": "Constant",
+			"bias_filler_param": 0.0,
+			"out": ["cls_score_conv_1"]
+		},
+        {
+			"in": ["cls_score_conv_1"],
+			"type": "Reshape",
+			"name": "reshape_cls_1",
+			"shape": [0, 2, 4, 53, 53, 26],
+			"out": ["cls_score_conv_1_reshape"]
+		},
+        {
+			"in": ["cls_score_conv_1_reshape"],
+			"type": "Softmax",
+			"stable_gradient": true,
+			"name": "cls_score_1",
+			"out": ["cls_score_1"]
+		},
+        {
+			"in": ["cls_score_1","label_1"],
+			"type": "Loss",
+			"name": "loss_cls_1",
+			"mode": "MultinomialLogistic_StableSoftmax",
+			"loss_weight": 5000.0
+		},
+    ]
+}
