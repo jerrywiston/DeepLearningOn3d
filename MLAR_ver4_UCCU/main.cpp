@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 	img2d* imgUCCU = new img2d(loadShader("./shader/vs_img2d.txt", "./shader/fs_img2d.txt"), "uccu.bmp", false);
 	imgUCCU->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
 	imgUCCU->setUniformVec3Color("color_input");
-	imgUCCU->show(600, 0, 200);
+	imgUCCU->show(600, 0, 200, 200);
 
 	//Enable vsync
 	glfwSwapInterval(1);
@@ -304,11 +304,11 @@ int main(int argc, char* argv[])
 		if (isStart){
 			static int ani = 0;
 			if(ani == 0){
-				imgUCCU->show(600,20,200);
+				imgUCCU->show(600, 20, 200, 200);
 				ani = 1;
 			}
 			else{
-				imgUCCU->show(600,0,200);
+				imgUCCU->show(600, 0, 200, 200);
 				ani = 0;
 			}
 

@@ -176,7 +176,7 @@ int RANSAC::plane_group(int arg_plane, int arg_random, float arg_dist, MatrixXf 
 
 		PointCloud_mid = PointCloudOther;
 
-		cout << "Group " << i << " total : " << PointCloudGroup.cols() << endl;
+		cout << "Group " << i << " : " << PointCloudGroup.cols() << endl;
 		count = count + PointCloudGroup.cols();
 
 		PointCloudG_mid[i] = PointCloudGroup;
