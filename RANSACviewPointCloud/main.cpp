@@ -23,7 +23,7 @@ using namespace std;
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
-#define MAX_LEN 2048
+#define MAX_LEN 4096
 
 static void setUniformVec3(const GLuint program, const char* name, const glm::vec3 &vec);
 static glm::mat4 computeTransform(Eigen::Matrix3f&& rot, Eigen::Vector3f&& trans);
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 			arg_dist = atof(argv[count]);
 			status = 0;
 		}
-		else if(status == 4){
+		else if(status == 5){
 			arg_ransac = atoi(argv[count]);
 			status = 0;
 		}
@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
 		pointCloud_fused[i] = new cloud(program_fused[i], pcData[i]);
 		pointCloud_fused[i]->setModel(glm::mat4());
 		pointCloud_fused[i]->setUniformMat4Model("M");
-		if(atoi(argv[2]) == 1)
+		if(arg_ransac == 0)
 			class_color = glm::vec3(1.0f, 1.0f, 1.0f);
 		else if(i == 0)
 			class_color = glm::vec3(1.0f, 0.0f, 0.0f);
