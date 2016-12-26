@@ -117,7 +117,7 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 		else{
 			//error correction
 			status = 1;
-			cout << "<RayCast Fail> Use frame to frame ! " << err_dist << endl;
+			//cout << "<RayCast Fail> Use frame to frame ! " << err_dist << endl;
 			++loss_count;
 			icp::InitData(pc_now_rec, pc_now, normal_now);
 			if (icp::PointToPlaneAlign(align_samp, window_size, iterate) < 0){
@@ -156,10 +156,10 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 		vg->rayCast(vertexMap_fused);
 
 		err_dist = error_count(pc_now, vertexMap_fused, 3000);
-		cout << "<Collapse> Use kd-tree ICP ! " << err_dist << endl;
+		//cout << "<Collapse> Use kd-tree ICP ! " << err_dist << endl;
 
 		if (pair != -1 && err_dist < 7000){
-			cout << "Back Success !!" << endl;
+			//cout << "Back Success !!" << endl;
 			point_cloud_rec = Map<MatrixXf>((float *)vertexMap_fused, 3, IMG_WIDTH*IMG_HEIGHT);
 			icp::InitData(point_cloud_rec, pc_now, normal_now);
 			icp::PointToPlaneAlign(align_samp, window_size, 10);

@@ -12,7 +12,7 @@ voxelGrid.o: voxelGrid.cu ICP_fusion.h voxelGrid.h skeleton3d.h cloud.h camera.h
 	nvcc $(CFLAGS) -c voxelGrid.cu $(CUDA_OPT)
 
 kdtree.o: kdtree.c kdtree.h
-	g++ $(CFLAGS) -c kdtree.c
+	gcc -O2 -c kdtree.c
 
 Eigen_kdtree.o: Eigen_kdtree.cpp Eigen_kdtree.hpp kdtree.h
 	g++ $(CFLAGS) -c Eigen_kdtree.cpp
@@ -42,4 +42,4 @@ visibleObj.o: visibleObj.cpp visibleObj.h
 	g++ $(CFLAGS) -c visibleObj.cpp $(LNK_GL)
 
 clean:
-	rm -f main.o voxelGrid.o ICP_fusion.o shader.o text2d.o skeleton3d.o cloud.o camera.o visibleObj.o MLAR
+	rm *.o MLAR

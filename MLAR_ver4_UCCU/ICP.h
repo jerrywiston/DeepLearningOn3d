@@ -221,7 +221,7 @@ namespace icp{
 	//Point to plane error matric
 	float PointToPlaneAlign(int samp, int wsize, int iterate){
 		if (pc_match.cols() < 10 || pc_origin.cols() < 10){
-			std::cout << "ICP fail !!" << std::endl;
+			//std::cout << "ICP fail !!" << std::endl;
 			return -1;
 		}
 
