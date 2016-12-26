@@ -29,7 +29,7 @@ static void setUniformVec3(const GLuint program, const char* name, const glm::ve
 static glm::mat4 computeTransform(Eigen::Matrix3f&& rot, Eigen::Vector3f&& trans);
 static Eigen::MatrixXf arr_to_mat(vector <Eigen::Vector3f> &v_pc);
 static Eigen::MatrixXf read_pc(const char *fn);
-
+static MatrixXf MergePointCloud(vector<MatrixXf> &PointCloudG);
 
 int main(int argc, char* argv[])
 {
@@ -289,7 +289,14 @@ int main(int argc, char* argv[])
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
+	//Save Point Cloud
+	cout << "Save model ..." << endl;
+	MatrixXf PointCloudOut;
+	PointCloudOut = MergePointCloud(PointCloudG);
+	fstream file;
+	file.open("output/out.npts", ios::out);
+	file << PointCloudOut.transpose();
+	cout << "Done !!" << endl;
 
 	//Release data=====================================================
 	std::cout << "Releasing data..." << std::endl << std::endl;
@@ -367,4 +374,21 @@ static Eigen::MatrixXf read_pc(const char *fn)
 	}
 	file.close();
 	return arr_to_mat(pc_arr);
+}
+
+static MatrixXf MergePointCloud(vector<MatrixXf> &PointCloudG)
+{
+    int ArrLen = 0;
+    for(int i=0; i<PointCloudG.size(); ++i)
+        ArrLen += PointCloudG[i].cols();
+
+    MatrixXf PointCloud(3, ArrLen);
+    int count = 0;
+    for(int i=0; i<PointCloudG.size(); ++i)
+        for(int j=0; j<PointCloudG[i].cols(); ++j){
+            PointCloud.col(count) = PointCloudG[i].col(j);
+            ++count;
+        }
+
+    return PointCloud;
 }
