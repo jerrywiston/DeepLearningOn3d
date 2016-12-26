@@ -128,7 +128,7 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 			camera_T = camera_R * icp::Ttot + camera_T;
 			point_cloud_rec = pc_now;
 
-			if (loss_count > 50){
+			if (loss_count > 30){
  				camera_R = Matrix3f::Identity();
 				camera_T << MAX_LEN / 2.0f, MAX_LEN / 2.0f, MAX_LEN / 4.0f;
 				collapse = true;
@@ -158,7 +158,7 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 		err_dist = error_count(pc_now, vertexMap_fused, 3000);
 		cout << "<Collapse> Use kd-tree ICP ! " << err_dist << endl;
 
-		if (pair != -1 && err_dist < 5000){
+		if (pair != -1 && err_dist < 7000){
 			cout << "Back Success !!" << endl;
 			point_cloud_rec = Map<MatrixXf>((float *)vertexMap_fused, 3, IMG_WIDTH*IMG_HEIGHT);
 			icp::InitData(point_cloud_rec, pc_now, normal_now);

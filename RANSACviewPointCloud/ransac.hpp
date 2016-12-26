@@ -10,28 +10,18 @@ namespace RANSAC{
 
     //Find one major plane
     int find_plane( MatrixXf PointCloud,
-                    MatrixXf NormalMap,
                     int total, //(arg_random)
                     float arg_dist,
                     MatrixXf &PointCloudGroup,
-                    MatrixXf &NormalMapGroup,
-                    MatrixXf &PointCloudOther,
-                    MatrixXf &NormalMapOther);
+                    MatrixXf &PointCloudOther   );
 
     //Find the major planes
     int plane_group(int arg_plane,
                     int arg_random,
                     float arg_dist,
-                    MatrixXf PointCloud,
-                    MatrixXf NormalMap,
-                    MatrixXf PointCloudG_mid[],
-                    MatrixXf NormalMapG_mid[]);
+                    MatrixXf &PointCloud,
+                    vector<MatrixXf> &PointCloudG_mid);
 
-    int plane_group(int arg_plane,
-                    int arg_random,
-                    float arg_dist,
-                    MatrixXf PointCloud,
-                    MatrixXf PointCloudG_mid[]);
 
-    Vector3f plane_normal(MatrixXf PointCloud, int num);
+    Vector3f plane_normal(MatrixXf &PointCloud, int num);
 };

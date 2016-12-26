@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include "Eigen/Eigen"
 #include "ransac.hpp"
 
@@ -25,7 +26,7 @@ Matrix3f AxisAngle2Matrix(float CosTheta, Vector3f u)
     return rot;
 }
 
-MatrixXf OrientationWall(int arg_plane, MatrixXf PointCloudG[]){
+MatrixXf OrientationWall(int arg_plane, vector <MatrixXf> &PointCloudG){
     Vector3f plane_nm[arg_plane];
 	for(int i=0; i<arg_plane; ++i){
 		plane_nm[i] = RANSAC::plane_normal(PointCloudG[i], 500);
@@ -49,7 +50,7 @@ MatrixXf OrientationWall(int arg_plane, MatrixXf PointCloudG[]){
             id = i;
         }
     }
-    cout << "<" << id << ">" << endl;
+    cout << "<Wall : " << id << ">" << endl;
 
     float CosTheta = nm_temp.dot(nm_wall);
     Vector3f u = nm_temp.cross(nm_wall).normalized();
@@ -62,7 +63,7 @@ MatrixXf OrientationWall(int arg_plane, MatrixXf PointCloudG[]){
     return rot;
 }
 
-MatrixXf OrientationFloor(int arg_plane, MatrixXf PointCloudG[]){
+MatrixXf OrientationFloor(int arg_plane, vector<MatrixXf> &PointCloudG){
     Vector3f plane_nm[arg_plane];
 	for(int i=0; i<arg_plane; ++i){
 		plane_nm[i] = RANSAC::plane_normal(PointCloudG[i], 500);
@@ -84,7 +85,7 @@ MatrixXf OrientationFloor(int arg_plane, MatrixXf PointCloudG[]){
             id = i;
         }
     }
-    cout << "<" << id << ">" << endl;
+    cout << "<Floor : " << id << ">" << endl;
 
     float CosTheta = nm_temp.dot(nm_gravity);
     Vector3f u = nm_temp.cross(nm_gravity).normalized();
@@ -95,4 +96,35 @@ MatrixXf OrientationFloor(int arg_plane, MatrixXf PointCloudG[]){
     Matrix3f rot = AxisAngle2Matrix(CosTheta, u);
 
     return rot;
+}
+
+void OrientationCorrect( int arg_random, int arg_plane, int arg_dist,
+                        MatrixXf &PointCloud, vector<MatrixXf> &PointCloudG){
+
+    PointCloudG.resize(arg_plane + 1);
+	//MatrixXf PointCloudG[arg_plane + 1];
+
+	int count = RANSAC::plane_group(arg_plane, arg_random, arg_dist, PointCloud, PointCloudG);
+	cout << "Total : " << PointCloud.cols() << endl;
+	//rotation
+	MatrixXf rotf = OrientationFloor(arg_plane, PointCloudG);
+	for(int i=0; i<arg_plane+1; ++i)
+		PointCloudG[i] = rotf * PointCloudG[i];
+	MatrixXf rotw = OrientationWall(arg_plane, PointCloudG);
+	for(int i=0; i<arg_plane+1; ++i)
+		PointCloudG[i] = rotw * PointCloudG[i];
+
+
+	//translation to origin
+	Vector3f PointCloudAve = Vector3f::Zero();
+	for(int i=0; i<arg_plane+1; ++i){
+		PointCloudAve(0) += PointCloudG[i].row(0).sum();
+		PointCloudAve(1) += PointCloudG[i].row(1).sum();
+		PointCloudAve(2) += PointCloudG[i].row(2).sum();
+	}
+
+	PointCloudAve /= PointCloud.cols();
+	for(int i=0; i<arg_plane+1; ++i)
+		for(int j=0; j<PointCloudG[i].cols(); ++j)
+			PointCloudG[i].col(j) -= PointCloudAve;
 }

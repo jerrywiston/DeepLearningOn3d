@@ -31,41 +31,37 @@ static Eigen::MatrixXf read_pc(const char *fn);
 
 int main(int argc, char* argv[])
 {
-
-	//RANSAC===============================================================
+	//set parameter
 	srand(time(0));
-	int arg_plane = 4;
 	int arg_random = 5000;
+	int arg_plane = 4;
 	float arg_dist = 10.0f;
 	float scale = 2048.0f;
+	if(argc > 3)
+		scale = atoi(argv[3]);
+	if(argc > 4)
+		arg_plane = atoi(argv[4]);
+	if(argc > 5)
+		arg_random = atoi(argv[5]);
+	if(argc > 6)
+		arg_dist = atoi(argv[6]);
 
+	//RANSAC===============================================================
 	MatrixXf PointCloud = scale * RANSAC::read_pc(argv[1]);
-	MatrixXf PointCloudG[arg_plane + 1];
-
-	int count = RANSAC::plane_group(arg_plane, arg_random, arg_dist, PointCloud, PointCloudG);
-	cout << "Total : " << PointCloud.cols() << endl;
-
-	//rotation
-	if(atoi(argv[2]) != 1){
-		MatrixXf rotf = OrientationFloor(arg_plane, PointCloudG);
-		for(int i=0; i<arg_plane+1; ++i)
-			PointCloudG[i] = rotf * PointCloudG[i];
-		MatrixXf rotw = OrientationWall(arg_plane, PointCloudG);
-		for(int i=0; i<arg_plane+1; ++i)
-			PointCloudG[i] = rotw * PointCloudG[i];
+	vector<MatrixXf> PointCloudG;
+	if(argv[2] == "0")
+		OrientationCorrect(arg_random, arg_plane, arg_dist, PointCloud, PointCloudG);
+	else{
+		PointCloudG.push_back(PointCloud);
+		Vector3f PointCloudAve = Vector3f::Zero();
+		PointCloudAve(0) += PointCloudG[0].row(0).sum();
+		PointCloudAve(1) += PointCloudG[0].row(1).sum();
+		PointCloudAve(2) += PointCloudG[0].row(2).sum();
+		PointCloudAve /= PointCloud.cols();
+		for(int j=0; j<PointCloudG[0].cols(); ++j)
+			PointCloudG[0].col(j) -= PointCloudAve;
+		arg_plane = 0;
 	}
-
-	//translation to origin
-	Vector3f PointCloudAve = Vector3f::Zero();
-	for(int i=0; i<arg_plane+1; ++i){
-		PointCloudAve(0) += PointCloudG[i].row(0).sum();
-		PointCloudAve(1) += PointCloudG[i].row(1).sum();
-		PointCloudAve(2) += PointCloudG[i].row(2).sum();
-	}
-	PointCloudAve /= PointCloud.cols();
-	for(int i=0; i<arg_plane+1; ++i)
-		for(int j=0; j<PointCloudG[i].cols(); ++j)
-			PointCloudG[i].col(j) -= PointCloudAve;
 
 	//Init GLFW============================================================
 	std::cout << "Initializing GLFW..." << std::endl;
