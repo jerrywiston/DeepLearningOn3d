@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <vector>
 #include <ctime>
 #include "Eigen/Eigen"
@@ -34,23 +35,77 @@ int main(int argc, char* argv[])
 {
 	//set parameter
 	srand(time(0));
+	string arg_name = "input/model.npts";
 	int arg_random = 5000;
 	int arg_plane = 4;
 	float arg_dist = 10.0f;
-	float scale = 2048.0f;
-	if(argc > 3)
-		scale = atoi(argv[3]);
-	if(argc > 4)
-		arg_plane = atoi(argv[4]);
-	if(argc > 5)
-		arg_random = atoi(argv[5]);
-	if(argc > 6)
-		arg_dist = atoi(argv[6]);
+	int arg_ransac = 1;
+	float scaleX = 4096.0f;
+	float scaleY = 2048.0f;
+	float scaleZ = 4096.0f;
 
+	int count = 1;
+	int status = 0;
+	while(count < argc){
+		if(status == 0){
+			if(strcmp(argv[count], "-name") == 0)
+				status = 1;
+			else if(strcmp(argv[count], "-random") == 0)
+				status = 2;
+			else if(strcmp(argv[count], "-plane") == 0)
+				status = 3;
+			else if(strcmp(argv[count], "-dist") == 0)
+				status = 4;
+			else if(strcmp(argv[count], "-ransac") == 0)
+				status = 5;
+			else if(strcmp(argv[count], "-scale") == 0)
+				status = 6;
+		}
+		else if(status == 1){
+			arg_name = string(argv[count]);
+			status = 0;
+		}
+		else if(status == 2){
+			arg_random = atoi(argv[count]);
+			status = 0;
+		}
+		else if(status == 3){
+			arg_plane = atoi(argv[count]);
+			status = 0;
+		}
+		else if(status == 4){
+			arg_dist = atof(argv[count]);
+			status = 0;
+		}
+		else if(status == 4){
+			arg_ransac = atoi(argv[count]);
+			status = 0;
+		}
+		else if(status == 6){
+			scaleX = atof(argv[count]);
+			status = 7;
+		}
+		else if(status == 7){
+			scaleY = atof(argv[count]);
+			status = 8;
+		}
+		else if(status == 8){
+			scaleZ = atof(argv[count]);
+			status = 0;
+		}
+		++count;
+	}
+	printf("Name: %s\nRandom: %d\nPlane: %d\nDist: %f\nRansac: %d\nScale: (%f, %f, %f)\n",
+			arg_name.c_str(), arg_random, arg_plane, arg_dist, arg_ransac, scaleX, scaleY, scaleZ);
 	//RANSAC===============================================================
-	MatrixXf PointCloud = scale * RANSAC::read_pc(argv[1]);
+	MatrixXf PointCloud = RANSAC::read_pc(arg_name.c_str());
+	for(int i=0; i<PointCloud.cols(); ++i){
+		PointCloud(0,i) *= scaleX;
+		PointCloud(1,i) *= scaleY;
+		PointCloud(2,i) *= scaleZ;
+	}
 	vector<MatrixXf> PointCloudG;
-	if(atoi(argv[2]) == 0)
+	if(arg_ransac == 1)
 		OrientationCorrect(arg_random, arg_plane, arg_dist, PointCloud, PointCloudG);
 	else{
 		PointCloudG.push_back(PointCloud);
