@@ -2,8 +2,14 @@ LNK_GL = -lGL -lGLU -lGLEW -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl 
 CUDA_OPT = --gpu-architecture=compute_50 --gpu-code=compute_50
 CFLAGS = -std=c++11 -O2
 
+all: PointCloudOrien ViewPointCloud
+
+PointCloudOrien: PointCloudOrien.cpp ransac.hpp orientation.hpp ransac.o
+	g++ $(CFLAGS) -o PointCloudOrien PointCloudOrien.cpp ransac.o
+
 ViewPointCloud: main.o  shader.o text2d.o skeleton3d.o cloud.o camera.o visibleObj.o ransac.o
 	g++ $(CFLAGS) -fopenmp -o ViewPointCloud main.o shader.o text2d.o skeleton3d.o cloud.o camera.o visibleObj.o ransac.o $(LNK_GL)
+
 main.o: main.cpp ransac.hpp orientation.hpp
 	g++ $(CFLAGS) -c main.cpp $(LNK_GL)
 
@@ -30,3 +36,4 @@ ransac.o: ransac.cpp ransac.hpp
 
 clean:
 	rm -f *.o ViewPointCloud
+	rm -f *.o PointCloudOrien

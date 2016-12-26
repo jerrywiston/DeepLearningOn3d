@@ -18,6 +18,7 @@
 #include "orientation.hpp"
 
 using namespace Eigen;
+using namespace std;
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -49,7 +50,7 @@ int main(int argc, char* argv[])
 	//RANSAC===============================================================
 	MatrixXf PointCloud = scale * RANSAC::read_pc(argv[1]);
 	vector<MatrixXf> PointCloudG;
-	if(argv[2] == "0")
+	if(atoi(argv[2]) == 0)
 		OrientationCorrect(arg_random, arg_plane, arg_dist, PointCloud, PointCloudG);
 	else{
 		PointCloudG.push_back(PointCloud);

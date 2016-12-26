@@ -50,7 +50,7 @@ MatrixXf OrientationWall(int arg_plane, vector <MatrixXf> &PointCloudG){
             id = i;
         }
     }
-    cout << "<Wall : " << id << ">" << endl;
+    cout << "[ Wall : " << id << "]" << endl;
 
     float CosTheta = nm_temp.dot(nm_wall);
     Vector3f u = nm_temp.cross(nm_wall).normalized();
@@ -85,7 +85,7 @@ MatrixXf OrientationFloor(int arg_plane, vector<MatrixXf> &PointCloudG){
             id = i;
         }
     }
-    cout << "<Floor : " << id << ">" << endl;
+    cout << "[Floor : " << id << "]" << endl;
 
     float CosTheta = nm_temp.dot(nm_gravity);
     Vector3f u = nm_temp.cross(nm_gravity).normalized();

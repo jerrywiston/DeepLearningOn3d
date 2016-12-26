@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     //Set Parameter
     MatrixXf PointCloudIn, PointCloudOut;
     int arg_random = 5000;
-	int arg_plane = 4;
+	int arg_plane = 5;
 	float arg_dist = 10.0f;
 	float scale = 2048.0f;
 
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]){
         sprintf(str, "output/%s", files[i].c_str());
         file.open(str, ios::out);
         file << PointCloudOut.transpose();
+        cout << "Done !!" << endl << endl;
     }
 
     return 0;
