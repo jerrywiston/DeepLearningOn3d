@@ -40,7 +40,6 @@ class voxelGrid
 private:
 	//Host data
 	voxel *vox;
-	bool *vox_macro_isActive;
 	vec *pc;
 	vec center;
 	vec dir;
@@ -52,7 +51,6 @@ private:
 
 	//GPU data pointer
 	voxel *d_vox;
-	bool *d_vox_macro_isActive;
 	vec *d_pc;
 	vec *d_vertexMap;
 	vec *d_vertexMap_fused;

@@ -19,7 +19,7 @@ ICP_fusion::ICP_fusion(int a_samp, int m_samp, int w_size, int iter){
 				0, 1, 0,
 				0, 0, 1;
 
-	camera_T << MAX_LEN / 2.0f, MAX_LEN / 2.0f, MAX_LEN / 4.0f;
+	camera_T << MAX_LEN_X / 2.0f, MAX_LEN_Y / 2.0f, MAX_LEN_Z / 4.0f;
 
 	//Set parameters
 	align_samp = a_samp;
@@ -106,7 +106,7 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 		err_dist = error_count(pc_now, vertexMap_fused, 3000);
 
 		//Ray-casting & Fusion
-		if(err_dist < 10000){
+		if(err_dist < 80000){
 			loss_count = 0;
 			vertexMap = (vec *)pc_now.data();
 			vg->computeOffset();
@@ -130,7 +130,7 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 
 			if (loss_count > 30){
  				camera_R = Matrix3f::Identity();
-				camera_T << MAX_LEN / 2.0f, MAX_LEN / 2.0f, MAX_LEN / 4.0f;
+				camera_T << MAX_LEN_X / 2.0f, MAX_LEN_Y / 2.0f, MAX_LEN_Z / 4.0f;
 				collapse = true;
 			}
 		}
@@ -158,7 +158,7 @@ int ICP_fusion::update(MatrixXf &pc_now, MatrixXf &normal_now)
 		err_dist = error_count(pc_now, vertexMap_fused, 3000);
 		//cout << "<Collapse> Use kd-tree ICP ! " << err_dist << endl;
 
-		if (pair != -1 && err_dist < 7000){
+		if (pair != -1 && err_dist < 50000){
 			//cout << "Back Success !!" << endl;
 			point_cloud_rec = Map<MatrixXf>((float *)vertexMap_fused, 3, IMG_WIDTH*IMG_HEIGHT);
 			icp::InitData(point_cloud_rec, pc_now, normal_now);
@@ -238,7 +238,7 @@ void ICP_fusion::savePointCloud(const char* fileName)
 
 	if (file){
 		for (unsigned int i = 0; i < pc.size(); ++i)
-			file << (pc[i].x - MAX_LEN / 2.0f) / MAX_LEN << "\t" << (pc[i].y - MAX_LEN / 1.75f) / MAX_LEN << "\t" << (pc[i].z - 200) / MAX_LEN << std::endl;
+			file << (pc[i].x - MAX_LEN_X / 2.0f) / MAX_LEN_X << "\t" << (pc[i].y - MAX_LEN_Y / 1.75f) / MAX_LEN_Y << "\t" << (pc[i].z - 200) / MAX_LEN_Z << std::endl;
 
 		file.close();
 	}

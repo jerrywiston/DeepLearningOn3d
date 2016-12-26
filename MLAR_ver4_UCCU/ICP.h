@@ -82,8 +82,8 @@ namespace icp{
 
 	//Transform world coordinate to depth coordinate.
 	void WorldToDepth(float wx, float wy, float wz, int &cx, int &cy){
-		cx = (int)round(wx * FOCAL_LEN / wz + IMG_WIDTH_OVER_TWO);
-		cy = (int)round(wy * -FOCAL_LEN / wz + IMG_HEIGHT_OVER_TWO);
+		cx = (int)round(wx * FOCAL_LEN / wz + IMG_WIDTH/2);
+		cy = (int)round(wy * -FOCAL_LEN / wz + IMG_HEIGHT/2);
 	}
 
 

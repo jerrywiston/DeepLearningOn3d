@@ -24,14 +24,12 @@
 using namespace openni;
 
 static void setUniformVec3(const GLuint program, const char* name, const glm::vec3 &vec);
-static glm::mat4 computeTransform(Eigen::Matrix3f&& rot, Eigen::Vector3f&& trans);
 static glm::mat4 computeTranslation(vec&& trans);
 static void convertToVec3(std::vector<vec> &v_in, std::vector<glm::vec3> &v_out);
 static glm::vec3 vectorToVec(Vector3f&& v_in);
 static MatrixXf arr_to_mat(vector <Vector3f> &v_pc);
 static void get_normal_map(MatrixXf &pc, MatrixXf &nm);
 static void DepthToWorld(int cx, int cy, unsigned short int cz, float &wx, float &wy, float &wz);
-static MatrixXf read_pc(const char *fn);
 static void get_point_cloud(VideoStream &streamDepth, VideoFrameRef &frameDepth, MatrixXf &pc);
 static DepthPixel* get_depth_pixel(VideoStream &streamDepth, VideoFrameRef &frameDepth);
 static glm::mat4 TransEigen2Mat4(Eigen::Vector3f trans);
@@ -115,7 +113,7 @@ int main(int argc, char* argv[])
 	//Add camera===========================================================
 	std::cout << "Initializing camera..." << std::endl;
 
-	camera* camera_p1 = new camera(vec3(MAX_LEN / 2, MAX_LEN + 500, -1600), WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+	camera* camera_p1 = new camera(vec3(MAX_LEN_X / 2, MAX_LEN_Y, -500), WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	camera_p1->setKeySpeed(1000.f);
 	camera_p1->setDirection(0.f, -0.6f);
 
@@ -170,32 +168,32 @@ int main(int argc, char* argv[])
 
 	std::vector<glm::vec3> vertexData_vol_max(24);
 	vertexData_vol_max[0] = vec3(0, 0, 0);
-	vertexData_vol_max[1] = vec3(MAX_LEN, 0, 0);
-	vertexData_vol_max[2] = vec3(MAX_LEN, 0, 0);
-	vertexData_vol_max[3] = vec3(MAX_LEN, MAX_LEN, 0);
-	vertexData_vol_max[4] = vec3(MAX_LEN, MAX_LEN, 0);
-	vertexData_vol_max[5] = vec3(0, MAX_LEN, 0);
-	vertexData_vol_max[6] = vec3(0, MAX_LEN, 0);
+	vertexData_vol_max[1] = vec3(MAX_LEN_X, 0, 0);
+	vertexData_vol_max[2] = vec3(MAX_LEN_X, 0, 0);
+	vertexData_vol_max[3] = vec3(MAX_LEN_X, MAX_LEN_Y, 0);
+	vertexData_vol_max[4] = vec3(MAX_LEN_X, MAX_LEN_Y, 0);
+	vertexData_vol_max[5] = vec3(0, MAX_LEN_Y, 0);
+	vertexData_vol_max[6] = vec3(0, MAX_LEN_Y, 0);
 	vertexData_vol_max[7] = vec3(0, 0, 0);
 
 	vertexData_vol_max[8] = vec3(0, 0, 0);
-	vertexData_vol_max[9] = vec3(0, 0, MAX_LEN);
-	vertexData_vol_max[10] = vec3(0, 0, MAX_LEN);
-	vertexData_vol_max[11] = vec3(0, MAX_LEN, MAX_LEN);
-	vertexData_vol_max[12] = vec3(0, MAX_LEN, MAX_LEN);
-	vertexData_vol_max[13] = vec3(0, MAX_LEN, 0);
+	vertexData_vol_max[9] = vec3(0, 0, MAX_LEN_Z);
+	vertexData_vol_max[10] = vec3(0, 0, MAX_LEN_Z);
+	vertexData_vol_max[11] = vec3(0, MAX_LEN_Y, MAX_LEN_Z);
+	vertexData_vol_max[12] = vec3(0, MAX_LEN_Y, MAX_LEN_Z);
+	vertexData_vol_max[13] = vec3(0, MAX_LEN_Y, 0);
 
-	vertexData_vol_max[14] = vec3(MAX_LEN, 0, 0);
-	vertexData_vol_max[15] = vec3(MAX_LEN, 0, MAX_LEN);
-	vertexData_vol_max[16] = vec3(MAX_LEN, 0, MAX_LEN);
-	vertexData_vol_max[17] = vec3(MAX_LEN, MAX_LEN, MAX_LEN);
-	vertexData_vol_max[18] = vec3(MAX_LEN, MAX_LEN, MAX_LEN);
-	vertexData_vol_max[19] = vec3(MAX_LEN, MAX_LEN, 0);
+	vertexData_vol_max[14] = vec3(MAX_LEN_X, 0, 0);
+	vertexData_vol_max[15] = vec3(MAX_LEN_X, 0, MAX_LEN_Z);
+	vertexData_vol_max[16] = vec3(MAX_LEN_X, 0, MAX_LEN_Z);
+	vertexData_vol_max[17] = vec3(MAX_LEN_X, MAX_LEN_Y, MAX_LEN_Z);
+	vertexData_vol_max[18] = vec3(MAX_LEN_X, MAX_LEN_Y, MAX_LEN_Z);
+	vertexData_vol_max[19] = vec3(MAX_LEN_X, MAX_LEN_Y, 0);
 
-	vertexData_vol_max[20] = vec3(0, MAX_LEN, MAX_LEN);
-	vertexData_vol_max[21] = vec3(MAX_LEN, MAX_LEN, MAX_LEN);
-	vertexData_vol_max[22] = vec3(0, 0, MAX_LEN);
-	vertexData_vol_max[23] = vec3(MAX_LEN, 0, MAX_LEN);
+	vertexData_vol_max[20] = vec3(0, MAX_LEN_Y, MAX_LEN_Z);
+	vertexData_vol_max[21] = vec3(MAX_LEN_X, MAX_LEN_Y, MAX_LEN_Z);
+	vertexData_vol_max[22] = vec3(0, 0, MAX_LEN_Z);
+	vertexData_vol_max[23] = vec3(MAX_LEN_X, 0, MAX_LEN_Z);
 
 	GLuint program_vol_max = loadShader("./shader/vs.txt", "./shader/fs.txt");;
 	skeleton3d* grid_max = new skeleton3d(program_vol_max, vertexData_vol_max);
@@ -459,18 +457,6 @@ static void setUniformVec3(const GLuint program, const char* name, const glm::ve
 
 
 /*=================================
-Compute transformation matrix
-=================================*/
-static glm::mat4 computeTransform(Eigen::Matrix3f&& rot, Eigen::Vector3f&& trans)
-{
-	return glm::mat4(rot(0, 0), rot(0, 1), rot(0, 2), 0.f,
-					 rot(1, 0), rot(1, 1), rot(1, 2), 0.f,
-					 rot(2, 0), rot(2, 1), rot(2, 2), 0.f,
-					 trans(0), trans(1), trans(2), 1.f);
-}
-
-
-/*=================================
 Compute translation matrix
 =================================*/
 static glm::mat4 computeTranslation(vec&& trans)
@@ -571,8 +557,8 @@ static void DepthToWorld(int cx, int cy, unsigned short int cz, float &wx, float
 		return;
 	}
 
-	wx = (cx - IMG_WIDTH_OVER_TWO) * cz / FOCAL_LEN;
-	wy = (IMG_HEIGHT_OVER_TWO - cy) * cz / FOCAL_LEN;
+	wx = (cx - IMG_WIDTH/2) * cz / FOCAL_LEN;
+	wy = (IMG_HEIGHT/2 - cy) * cz / FOCAL_LEN;
 	wz = (float)cz;
 }
 
