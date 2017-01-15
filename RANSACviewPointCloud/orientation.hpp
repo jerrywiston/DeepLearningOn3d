@@ -7,6 +7,9 @@
 using namespace std;
 using namespace Eigen;
 
+int floorID = -1;
+int wallID = -1;
+
 Matrix3f AxisAngle2Matrix(float CosTheta, Vector3f u)
 {
     float SinTheta = sqrt(1 - CosTheta*CosTheta);
@@ -51,6 +54,7 @@ MatrixXf OrientationWall(int arg_plane, vector <MatrixXf> &PointCloudG){
         }
     }
     cout << "[ Wall : " << id << "]" << endl;
+    wallID = id;
 
     float CosTheta = nm_temp.dot(nm_wall);
     Vector3f u = nm_temp.cross(nm_wall).normalized();
@@ -86,6 +90,7 @@ MatrixXf OrientationFloor(int arg_plane, vector<MatrixXf> &PointCloudG){
         }
     }
     cout << "[Floor : " << id << "]" << endl;
+    floorID = id;
 
     float CosTheta = nm_temp.dot(nm_gravity);
     Vector3f u = nm_temp.cross(nm_gravity).normalized();
@@ -122,9 +127,13 @@ void OrientationCorrect( int arg_random, int arg_plane, int arg_dist,
 		PointCloudAve(1) += PointCloudG[i].row(1).sum();
 		PointCloudAve(2) += PointCloudG[i].row(2).sum();
 	}
+    PointCloudAve /= PointCloud.cols();
 
-	PointCloudAve /= PointCloud.cols();
+    //calculate wall Z
+    //float wallZ = PointCloudG[wallID].row(2).sum() / PointCloudG[wallID].cols();
 	for(int i=0; i<arg_plane+1; ++i)
-		for(int j=0; j<PointCloudG[i].cols(); ++j)
+		for(int j=0; j<PointCloudG[i].cols(); ++j){
 			PointCloudG[i].col(j) -= PointCloudAve;
+            //PointCloudG[i](2,j) -= wallZ;
+        }
 }

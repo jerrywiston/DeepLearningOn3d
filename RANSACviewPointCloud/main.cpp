@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
 	int arg_plane = 4;
 	float arg_dist = 10.0f;
 	int arg_ransac = 1;
-	float scaleX = 4096.0f;
-	float scaleY = 2048.0f;
-	float scaleZ = 4096.0f;
+	float scaleX = 1;//4096.0f;
+	float scaleY = 1;//2048.0f;
+	float scaleZ = 1;//4096.0f;
 
 	int count = 1;
 	int status = 0;
@@ -105,8 +105,17 @@ int main(int argc, char* argv[])
 		PointCloud(2,i) *= scaleZ;
 	}
 	vector<MatrixXf> PointCloudG;
-	if(arg_ransac == 1)
+	if(arg_ransac == 1){
 		OrientationCorrect(arg_random, arg_plane, arg_dist, PointCloud, PointCloudG);
+		float wallZ = MAX_LEN - PointCloudG[wallID].row(2).sum() / PointCloudG[wallID].cols() - 300;
+		for(int i=0; i<arg_plane+1 ; ++i)
+			for(int j=0; j<PointCloudG[i].cols(); ++j){
+				//PointCloudG[i](2,j) = 4096;
+				PointCloudG[i](0,j) += MAX_LEN/2;
+				PointCloudG[i](1,j) += MAX_LEN/2;
+				PointCloudG[i](2,j) += wallZ;
+			}
+	}
 	else{
 		PointCloudG.push_back(PointCloud);
 		Vector3f PointCloudAve = Vector3f::Zero();
@@ -114,8 +123,9 @@ int main(int argc, char* argv[])
 		PointCloudAve(1) += PointCloudG[0].row(1).sum();
 		PointCloudAve(2) += PointCloudG[0].row(2).sum();
 		PointCloudAve /= PointCloud.cols();
-		for(int j=0; j<PointCloudG[0].cols(); ++j)
-			PointCloudG[0].col(j) -= PointCloudAve;
+		//for(int j=0; j<PointCloudG[0].cols(); ++j)
+		//	PointCloudG[0].col(j) -= PointCloudAve;
+
 		arg_plane = 0;
 	}
 
@@ -199,7 +209,7 @@ int main(int argc, char* argv[])
 	GLuint program_vol_max = loadShader("./shader/vs.txt", "./shader/fs.txt");;
 	skeleton3d* grid_max = new skeleton3d(program_vol_max, vertexData_vol_max);
 	setUniformVec3(program_vol_max, "color_input", glm::vec3(0.8f, 0.5f, 0.5f));
-	grid_max->setModel(glm::translate(glm::mat4(), glm::vec3(-MAX_LEN/2, -MAX_LEN/2, -MAX_LEN/2)));
+	//grid_max->setModel(glm::translate(glm::mat4(), glm::vec3(-MAX_LEN/2, -MAX_LEN/2, -MAX_LEN/2)));
 	grid_max->setUniformMat4Model("M");
 
 	//Add point cloud model=======================================================

@@ -238,7 +238,8 @@ void ICP_fusion::savePointCloud(const char* fileName)
 
 	if (file){
 		for (unsigned int i = 0; i < pc.size(); ++i)
-			file << (pc[i].x - MAX_LEN_X / 2.0f) / MAX_LEN_X << "\t" << (pc[i].y - MAX_LEN_Y / 1.75f) / MAX_LEN_Y << "\t" << (pc[i].z - 200) / MAX_LEN_Z << std::endl;
+			file << pc[i].x << "\t" << pc[i].y << "\t" << pc[i].z << endl;
+			//file << (pc[i].x - MAX_LEN_X / 2.0f) / MAX_LEN_X << "\t" << (pc[i].y - MAX_LEN_Y / 1.75f) / MAX_LEN_Y << "\t" << (pc[i].z - 200) / MAX_LEN_Z << std::endl;
 
 		file.close();
 	}

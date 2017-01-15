@@ -14,8 +14,11 @@ using namespace cv;
 int main(int argc, char *argv[]){
     unsigned short pDepth[IMG_HEIGHT*IMG_WIDTH];
     FILE *fp;
+    int speed = 15;
     if(argc>1)
-        fp = fopen(argv[1], "rb");
+        speed = atoi(argv[1]);
+    if(argc==3)
+        fp = fopen(argv[2], "rb");
     else
         fp = fopen("test.dvs", "rb");
 
@@ -23,7 +26,7 @@ int main(int argc, char *argv[]){
     cv::namedWindow("Depth Image", CV_WINDOW_AUTOSIZE);
     int FrameCount = 0;
     while(1){
-        if(fp && FrameCount%30 == 0){
+        if(fp && FrameCount%speed == 0){
             fread(pDepth, sizeof(unsigned short), IMG_WIDTH*IMG_HEIGHT, fp);
             FrameCount = 0;
         }
