@@ -1,0 +1,20 @@
+#version 330 core
+
+//Input data
+layout(location = 0) in vec2 vertexPos_s;	//in screen space
+layout(location = 1) in vec2 vertexUV;
+
+//Output data
+out vec2 UV;
+
+void main()
+{
+	//Output position of the vertex (in clip space)
+	//map [0..800][0..600] to [-1..1][-1..1]
+	vec2 vertexPos_h = vertexPos_s - vec2(400, 300);		//in homogeneous space: map [0..800][0..600] to [-400..400][-300..300]
+	vertexPos_h /= vec2(400, 300);
+	
+	gl_Position = vec4(vertexPos_h ,0 ,1);
+	
+	UV = vertexUV;
+}
