@@ -107,13 +107,25 @@ int main(int argc, char* argv[])
 	vector<MatrixXf> PointCloudG;
 	if(arg_ransac == 1){
 		OrientationCorrect(arg_random, arg_plane, arg_dist, PointCloud, PointCloudG);
-		float wallZ = MAX_LEN - PointCloudG[wallID].row(2).sum() / PointCloudG[wallID].cols() - 300;
+
+		float maxZ = -99999;
+		float minY = 99999;
+		for(int i=0; i<arg_plane+1 ; ++i)
+			for(int j=0; j<PointCloudG[i].cols(); ++j){
+				if(PointCloudG[i](2, j) > maxZ)
+					maxZ = PointCloudG[i](2, j);
+				if(PointCloudG[i](1, j) < minY)
+					minY = PointCloudG[i](1, j);
+		}
+		maxZ += 30;
+		minY -= 30;
+		cout << minY << endl;
 		for(int i=0; i<arg_plane+1 ; ++i)
 			for(int j=0; j<PointCloudG[i].cols(); ++j){
 				//PointCloudG[i](2,j) = 4096;
 				PointCloudG[i](0,j) += MAX_LEN/2;
-				PointCloudG[i](1,j) += MAX_LEN/2;
-				PointCloudG[i](2,j) += wallZ;
+				PointCloudG[i](1,j) -= minY;
+				PointCloudG[i](2,j) += MAX_LEN - maxZ;
 			}
 	}
 	else{
