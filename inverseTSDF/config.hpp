@@ -4,7 +4,7 @@
 #define RESOL_X					   512
 #define RESOL_Y                    256
 #define RESOL_Z                    512
-#define RESOL_VOL 			 	   192
+#define RESOL_VOL 			 	   256
 #define VOX_LEN 		 	  	   8.0f
 #define TRUNCATE 		 	  	   8.0f
 #define STEP 			 	  	   8.0f

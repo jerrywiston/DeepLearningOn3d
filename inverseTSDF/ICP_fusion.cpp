@@ -249,3 +249,8 @@ void ICP_fusion::inverseTSDF(std::vector<vec> &pc)
 {
 	vg->inverseTSDF(pc);
 }
+
+voxel* ICP_fusion::getVox()
+{
+	return vg->getVox();
+}

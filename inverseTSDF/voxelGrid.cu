@@ -353,8 +353,12 @@ void voxelGrid::fusion(vec *vertexMap)
 	//	fusion_CUDA << <512, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
 
 	//RESOL_VOL = 192
-	for (int j = 0; j < RESOL_VOL; j += 8)
-		fusion_CUDA << <576, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
+	//for (int j = 0; j < RESOL_VOL; j += 8)
+	//	fusion_CUDA << <576, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
+
+	//RESOL_VOL = 256
+	for (int j = 0; j < RESOL_VOL; j += 4)
+		fusion_CUDA << <512, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
 }
 
 
@@ -524,7 +528,7 @@ void voxelGrid::inverseTSDF(std::vector<vec> &pc)
 			vertexMap[i].z = 0;
 		}
 
-		setTrans(256*j, 256*k, 0);
+		setTrans(256*j, 256*k, 2048);
 		setRot(1, 0, 0,
 			   0, 1, 0,
 		       0, 0, 1);
@@ -556,7 +560,7 @@ void voxelGrid::inverseTSDF(std::vector<vec> &pc)
 
 				//The pixel is within the depth map
 				if (x > 0 && x < IMG_WIDTH && y > 0 && y < IMG_HEIGHT){
-					vertexMap[pix] = depthToWorld(x, y, point.z);
+					vertexMap[pix] = point_viewSpace;
 				}
 			}
 		}
@@ -567,23 +571,10 @@ void voxelGrid::inverseTSDF(std::vector<vec> &pc)
 }
 
 
-/*====================================
-Convert depth to world
-====================================*/
-vec voxelGrid::depthToWorld(int u, int v, int z)
+voxel* voxelGrid::getVox()
 {
-	vec point;
+	//Download voxel data
+	cudaMemcpy(vox, d_vox, RESOL_X*RESOL_Y*RESOL_Z * sizeof(voxel), cudaMemcpyDeviceToHost);
 
-	if (z == 0){
-		point.x = 0;
-		point.y = 0;
-		point.z = 0;
-		return point;
-	}
-
-	point.x = (u - IMG_WIDTH/2) * z / FOCAL_LEN;
-	point.y = (IMG_HEIGHT/2 - v) * z / FOCAL_LEN;
-	point.z = (float)z;
-
-	return point;
+	return vox;
 }

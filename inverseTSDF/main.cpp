@@ -16,6 +16,8 @@
 #include "text2d.h"
 #include "config.hpp"
 #include "img2d.h"
+#include "tensorUtil.hpp"
+
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -30,13 +32,14 @@ static void DepthToWorld(int cx, int cy, unsigned short int cz, float &wx, float
 static glm::mat4 TransEigen2Mat4(Eigen::Vector3f trans);
 static glm::mat4 RotEigen2Mat4(Eigen::Matrix3f rot);
 static bool readPointCloud(const std::string fileName, std::vector<vec> &pc);
+static bool saveTSDF(const std::string fileName, voxel *vox);
 
 
 int main(int argc, char* argv[])
 {
 	//Read point cloud==========================================================
 	std::vector<vec> pc;
-	readPointCloud("./model/model.npts", pc);
+	readPointCloud("./model/out.npts", pc);
 
 
 	//Init GLFW=================================================================
@@ -309,8 +312,8 @@ int main(int argc, char* argv[])
 		grid_max->render();
 		//grid->render();
 		//cam->render();
-		pointCloud_fused->render();
 		//pointCloud_origin->render();
+		pointCloud_fused->render();
 		txtFps->render();
 		//depthImg->render();
 
@@ -321,7 +324,7 @@ int main(int argc, char* argv[])
 
 	if (isSave){
 		std::cout << "Saving data..." << std::endl << std::endl;
-		fusion_test.savePointCloud("model/model.npts");
+		saveTSDF("test.tensor", fusion_test.getVox());
 	}
 
 
@@ -501,4 +504,40 @@ static bool readPointCloud(const std::string fileName, std::vector<vec> &pc)
 
 	fclose(fp);
 	return true;
+}
+
+
+static bool saveTSDF(const std::string fileName, voxel *vox)
+{
+	tensor_t tensor;
+
+	tensor.type = TYPE_FLOAT;
+	tensor.size = 4;
+	tensor.name = "TSDF";
+	tensor.numDim = 5;
+	tensor.dims = new int32_t[5];
+	float* data = new float[RESOL_X*RESOL_Y*RESOL_Z];
+
+	tensor.dims[0] = 1;
+	tensor.dims[1] = 1;
+	tensor.dims[2] = RESOL_X;
+	tensor.dims[3] = RESOL_Y;
+	tensor.dims[4] = RESOL_Z;
+
+	for(int i = 0; i < RESOL_X*RESOL_Y*RESOL_Z; ++i){
+		float tsdf = vox[i].tsdf;
+
+	 	if(vox[i].isActive) data[i] = tsdf;
+		else data[i] = 0;
+	}
+
+	tensor.value = (void*)data;
+
+	if(writeTensor(fileName, &tensor)){
+		releaseTensor(&tensor);
+		return true;
+	}
+
+	releaseTensor(&tensor);
+	return false;
 }

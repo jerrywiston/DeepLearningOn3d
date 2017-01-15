@@ -27,6 +27,7 @@ public:
 	MatrixXf get_point_cloud_rec();
 	vec getVoxOffset();
 	std::vector<vec> getPointCloud();
+	voxel* getVox();
 	void savePointCloud(const char* fileName);
 	void inverseTSDF(std::vector<vec> &pc);
 

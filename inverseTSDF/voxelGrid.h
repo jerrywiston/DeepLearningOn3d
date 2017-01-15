@@ -78,9 +78,9 @@ public:
 	void setRot(mat r);
 	void computeOffset();
 	vec getOffsetTrans();
+	voxel* getVox();
 
 	void inverseTSDF(std::vector<vec> &pc);
-	static vec depthToWorld(int u, int v, int z);
 };
 
 #endif
