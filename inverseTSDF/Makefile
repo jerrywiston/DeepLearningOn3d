@@ -2,7 +2,7 @@ LNK_GL = -lGL -lGLU -lGLEW -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl 
 CUDA_OPT = --gpu-architecture=compute_50 --gpu-code=compute_50
 CFLAGS = -std=c++11 -O2
 
-MLAR: main.o voxelGrid.o ICP_fusion.o shader.o text2d.o img2d.o skeleton3d.o cloud.o camera.o visibleObj.o kdtree.o Eigen_kdtree.o
+inverseTSDF: main.o voxelGrid.o ICP_fusion.o shader.o text2d.o img2d.o skeleton3d.o cloud.o camera.o visibleObj.o kdtree.o Eigen_kdtree.o
 	nvcc -Xcompiler -fopenmp $(CFLAGS) -o inverseTSDF main.o voxelGrid.o ICP_fusion.o shader.o text2d.o img2d.o skeleton3d.o cloud.o camera.o visibleObj.o kdtree.o Eigen_kdtree.o -lgomp $(LNK_GL) $(CUDA_OPT)
 
 main.o: main.cpp voxelGrid.h config.hpp tensorUtil.hpp half.hpp

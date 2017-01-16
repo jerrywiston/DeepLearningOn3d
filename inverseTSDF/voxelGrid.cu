@@ -35,7 +35,7 @@ __global__ void fusion_CUDA(voxel *vox, vec *vertexMap, vec *trans, mat *rot, ve
 	point_vox.z = rot->x3 * tmp.x + rot->y3 * tmp.y + rot->z3 * tmp.z;
 
 	//Projected onto the img plane
-	if (point_vox.z > 0){
+	if (point_vox.z > LOWER_BOUND){
 		int x = (int)(point_vox.x * FOCAL_LEN / point_vox.z + IMG_WIDTH/2);
 		int y = (int)(point_vox.y * -FOCAL_LEN / point_vox.z + IMG_HEIGHT/2);
 		int pix = IMG_WIDTH * y + x;
@@ -353,12 +353,12 @@ void voxelGrid::fusion(vec *vertexMap)
 	//	fusion_CUDA << <512, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
 
 	//RESOL_VOL = 192
-	//for (int j = 0; j < RESOL_VOL; j += 8)
-	//	fusion_CUDA << <576, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
+	for (int j = 0; j < RESOL_VOL; j += 8)
+		fusion_CUDA << <576, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
 
 	//RESOL_VOL = 256
-	for (int j = 0; j < RESOL_VOL; j += 4)
-		fusion_CUDA << <512, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
+	//for (int j = 0; j < RESOL_VOL; j += 4)
+	//	fusion_CUDA << <512, 512 >> > (d_vox, d_vertexMap, d_trans, d_rot, d_offset, j);
 }
 
 
@@ -402,9 +402,9 @@ void voxelGrid::rayCastAll(std::vector<vec> &pcData)
 	pc_count = 0;
 	cudaMemcpy(d_pc_count, &pc_count, sizeof(unsigned int), cudaMemcpyHostToDevice);
 
-	rayCastAll_X_CUDA<<<256, 512>>>(d_vox, d_pc, d_pc_count);
-	rayCastAll_Y_CUDA<<<512, 512>>>(d_vox, d_pc, d_pc_count);
-	rayCastAll_Z_CUDA<<<256, 512>>>(d_vox, d_pc, d_pc_count);
+	rayCastAll_X_CUDA<<<10, 512>>>(d_vox, d_pc, d_pc_count);
+	rayCastAll_Y_CUDA<<<21, 512>>>(d_vox, d_pc, d_pc_count);
+	rayCastAll_Z_CUDA<<<10, 512>>>(d_vox, d_pc, d_pc_count);
 
 	//Download data from GPU
 	cudaMemcpy(&pc_count, d_pc_count, sizeof(unsigned int), cudaMemcpyDeviceToHost);
@@ -424,7 +424,7 @@ void voxelGrid::rayCastAll_approx(std::vector<vec> &pcData)
 	pc_count = 0;
 	cudaMemcpy(d_pc_count, &pc_count, sizeof(unsigned int), cudaMemcpyHostToDevice);
 
-	rayCastAll_X_CUDA<<<208, 512>>>(d_vox, d_pc, d_pc_count);
+	rayCastAll_X_CUDA<<<48, 512>>>(d_vox, d_pc, d_pc_count);
 
 	//Download data from GPU
 	cudaMemcpy(&pc_count, d_pc_count, sizeof(unsigned int), cudaMemcpyDeviceToHost);
@@ -520,15 +520,16 @@ void voxelGrid::inverseTSDF(std::vector<vec> &pc)
 {
 	vec vertexMap[IMG_WIDTH*IMG_HEIGHT];
 
-	for(int k = 0; k < 16; ++k)
-	for(int j = 0; j < 16; ++j){
+	for(int n = 0; n < 2; ++n)
+	for(int k = 0; k < 10; ++k)
+	for(int j = 0; j < 20; ++j){
 		for(int i = 0; i < IMG_WIDTH*IMG_HEIGHT; ++i){
 			vertexMap[i].x = 0;
 			vertexMap[i].y = 0;
 			vertexMap[i].z = 0;
 		}
 
-		setTrans(256*j, 256*k, 2048);
+		setTrans(256*j, 256*k, 1024*n);
 		setRot(1, 0, 0,
 			   0, 1, 0,
 		       0, 0, 1);

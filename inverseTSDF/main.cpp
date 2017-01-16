@@ -37,9 +37,20 @@ static bool saveTSDF(const std::string fileName, voxel *vox);
 
 int main(int argc, char* argv[])
 {
+	if(argc < 3){
+		std::cout << "ERROR: Too few arguments" << std::endl;
+		std::cout << "USAGE: ./inverseTSDF [input path] [output path]" << std::endl;
+		return -1;
+	}
+
 	//Read point cloud==========================================================
 	std::vector<vec> pc;
-	readPointCloud("./model/out.npts", pc);
+	if(readPointCloud(std::string(argv[1]), pc))
+		std::cout << "Read the point cloud successfully" << std::endl;
+	else{
+		std::cout << "ERROR: Failed to read the point cloud" << std::endl;
+		return -1;
+	}
 
 
 	//Init GLFW=================================================================
@@ -324,7 +335,7 @@ int main(int argc, char* argv[])
 
 	if (isSave){
 		std::cout << "Saving data..." << std::endl << std::endl;
-		saveTSDF("test.tensor", fusion_test.getVox());
+		saveTSDF(std::string(argv[2]), fusion_test.getVox());
 	}
 
 
@@ -511,24 +522,32 @@ static bool saveTSDF(const std::string fileName, voxel *vox)
 {
 	tensor_t tensor;
 
-	tensor.type = TYPE_FLOAT;
-	tensor.size = 4;
+	tensor.type = TYPE_HALF;
+	tensor.size = 2;
 	tensor.name = "TSDF";
 	tensor.numDim = 5;
 	tensor.dims = new int32_t[5];
-	float* data = new float[RESOL_X*RESOL_Y*RESOL_Z];
+	half_float::half* data = new half_float::half[104*104*50];
 
 	tensor.dims[0] = 1;
 	tensor.dims[1] = 1;
-	tensor.dims[2] = RESOL_X;
-	tensor.dims[3] = RESOL_Y;
-	tensor.dims[4] = RESOL_Z;
+	tensor.dims[2] = 104;
+	tensor.dims[3] = 104;
+	tensor.dims[4] = 50;
 
-	for(int i = 0; i < RESOL_X*RESOL_Y*RESOL_Z; ++i){
-		float tsdf = vox[i].tsdf;
+	for(int x = 0; x < 104; ++x)
+	for(int z = 0; z < 104; ++z)
+	for(int y = 0; y < 50; ++y){
+		unsigned int index1 = x*104*50 + z*50 + y;
 
-	 	if(vox[i].isActive) data[i] = tsdf;
-		else data[i] = 0;
+		if(x >= RESOL_X || z >= RESOL_Z) data[index1] = 0;
+		else{
+			unsigned int index2 = x * RESOL_Y*RESOL_Z + y * RESOL_Z + z;
+			half_float::half tsdf = half_float::half(vox[index2].tsdf);
+
+	 		if(vox[index2].isActive) data[index1] = tsdf;
+			else data[index1] = 0;
+		}
 	}
 
 	tensor.value = (void*)data;
