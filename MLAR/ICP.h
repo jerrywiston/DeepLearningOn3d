@@ -11,12 +11,6 @@
 
 using namespace Eigen;
 
-typedef struct{
-	int index;
-	float dist;
-}form;
-
-
 namespace icp{
 	//Original Pointcloud Data
 	MatrixXf pc_origin;
@@ -42,8 +36,8 @@ namespace icp{
 	//Initialize pointcloud data (pc_origin, pc_match, normal_match)
 	void InitData(MatrixXf &s_pc_origin, MatrixXf &s_pc_match, MatrixXf &s_normal_match){
 		Rtot << 1, 0, 0,
-				0, 1, 0,
-				0, 0, 1;
+			0, 1, 0,
+			0, 0, 1;
 
 		Ttot << 0, 0, 0;
 
